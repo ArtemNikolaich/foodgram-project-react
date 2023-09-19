@@ -10,6 +10,7 @@ from recipes.models import (
 )
 
 
+@admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'author', 'favorite_count')
     list_filter = ('name', 'author', 'tags')
@@ -21,31 +22,28 @@ class RecipeAdmin(admin.ModelAdmin):
     favorite_count.short_description = 'Избрано'
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
     list_filter = ('measurement_unit',)
     search_fields = ('name',)
 
 
+@admin.register(IngredientInRecipe)
 class IngredientInRecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'ingredient', 'amount')
 
 
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'color', 'slug')
 
 
+@admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
 
 
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
-
-
-admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(IngredientInRecipe, IngredientInRecipeAdmin)
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(ShoppingCart, ShoppingCartAdmin)

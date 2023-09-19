@@ -1,5 +1,3 @@
-from api.pagination import CustomPagination
-from api.serializers import CustomUserSerializer, FollowSerializer
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
@@ -8,16 +6,18 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.pagination import CustomPagination
 from users.models import Follow
+from users.serializers import CustomUserSerializer, FollowSerializer
 
-User = get_user_model()
+UserModel = get_user_model()
 
 
 class CustomUserViewSet(UserViewSet):
     """
     Кастомный ViewSet для работы с пользователями.
     """
-    queryset = User.objects.all()
+    queryset = UserModel.objects.all()
     serializer_class = CustomUserSerializer
     pagination_class = CustomPagination
 
@@ -31,7 +31,7 @@ class CustomUserViewSet(UserViewSet):
         Подписывает пользователя на другого пользователя или отменяет подписку.
         """
         user = request.user
-        author = get_object_or_404(User, id=self.kwargs.get('id'))
+        author = get_object_or_404(UserModel, id=self.kwargs.get('id'))
 
         if request.method == 'POST':
             serializer = FollowSerializer(
@@ -59,7 +59,7 @@ class CustomUserViewSet(UserViewSet):
         Возвращает список подписок текущего пользователя.
         """
         user = request.user
-        queryset = User.objects.filter(following__user=user)
+        queryset = UserModel.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = FollowSerializer(
             pages,

@@ -1,9 +1,4 @@
-from datetime import datetime
-
-from django.db.models import Sum
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import status
@@ -14,7 +9,12 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from recipes.models import (
-    Favorite, Ingredient, IngredientInRecipe, Recipe, ShoppingCart, Tag)
+    Favorite,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag
+)
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
@@ -25,7 +25,8 @@ from api.serializers import (
     RecipeWriteSerializer,
     TagSerializer
 )
-from foodgram.constants import CONTENT_TYPE, FILENAME
+
+from .utils import create_shopping_cart_response
 
 
 class RecipeViewSet(ModelViewSet):
@@ -110,28 +111,7 @@ class RecipeViewSet(ModelViewSet):
         if not user.shopping_cart.exists():
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user).values(
-                'ingredient__name', 'ingredient__measurement_unit').annotate(
-                    amount=Sum('amount')
-        )
-
-        today = datetime.today()
-        content = (
-            f'Foodgram. {today:%Y.%m.%d, %H:%M}\n'
-            f'Список покупок для: {user.get_full_name()}\n\n'
-        )
-        content += '\n'.join([
-            f'- {ingredient["ingredient__name"]}, '
-            f'{ingredient["ingredient__measurement_unit"]}: '
-            f'{ingredient["amount"]}'
-            for ingredient in ingredients
-        ])
-
-        response = HttpResponse(content, content_type=CONTENT_TYPE)
-        response['Content-Disposition'] = f'attachment; filename={FILENAME}'
-
-        return response
+        return create_shopping_cart_response(user)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):

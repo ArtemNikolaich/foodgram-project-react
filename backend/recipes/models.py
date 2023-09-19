@@ -10,7 +10,7 @@ from foodgram.constants import (
 
 )
 
-User = get_user_model()
+UserModel = get_user_model()
 
 
 class Ingredient(models.Model):
@@ -31,6 +31,12 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient'
+            )
+        ]
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -64,6 +70,12 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'color'],
+                name='unique_tag'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -78,7 +90,7 @@ class Recipe(models.Model):
         max_length=200
     )
     author = models.ForeignKey(
-        User,
+        UserModel,
         verbose_name='Автор рецепта',
         related_name='recipes',
         on_delete=models.SET_NULL,
@@ -167,7 +179,7 @@ class Favorite(models.Model):
     Модель для избранного.
     """
     user = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='favorites'
@@ -198,7 +210,7 @@ class ShoppingCart(models.Model):
     Модель для корзины покупок.
     """
     user = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='shopping_cart'
