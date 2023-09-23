@@ -25,7 +25,6 @@ from api.serializers import (
     RecipeWriteSerializer,
     TagSerializer
 )
-
 from .utils import create_shopping_cart_response
 
 
