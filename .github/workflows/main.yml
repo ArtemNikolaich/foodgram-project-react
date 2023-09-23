@@ -11,7 +11,7 @@ jobs:
   tests:
     name: PEP8 tests
     runs-on: ubuntu-latest
-        
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -112,6 +112,8 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
 
         script: |
+          pwd
+          ls
           sudo docker compose -f docker-compose.production.yml pull
 
           sudo docker compose -f docker-compose.production.yml down
