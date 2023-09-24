@@ -13,7 +13,7 @@ class Command(BaseCommand):
             data = json.load(f)
             for item in data:
                 print(item)
-                Ingredient.objects.create(
+                Ingredient.objects.get_or_create(
                     name=item['name'],
                     measurement_unit=item['measurement_unit']
                 )
