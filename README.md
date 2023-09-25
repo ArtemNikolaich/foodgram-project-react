@@ -33,7 +33,7 @@ infra/docker-compose.production.yml, infra/nginx.conf
 ```
 **Запустите проект с помощью Docker Compose:**
 ```
-sudo docker-compose -f docker-compose.production.yml up -d
+sudo docker compose -f docker-compose.production.yml up -d
 ```
 **Выполните миграции и соберите статические файлы:**
 ```
@@ -41,9 +41,10 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --noinput
 ```
-**Настройте Nginx:**
+**Настройте `внешний` Nginx:**
+**На сервере в редакторе nano откройте конфиг Nginx:**
 ```
-sudo docker compose -f docker-compose.production.yml exec nginx nginx -s reload
+nano /etc/nginx/sites-enabled/default
 ```
 **В файле конфигурации Nginx `(nginx.conf)` измените настройки location:**
 ```
@@ -59,6 +60,15 @@ sudo nginx -t
 ```
 sudo service nginx reload
 ```
+## Добавление тегов и ингредиентов
+1. Войдите в административную панель по данным суперпользователя.
+2. Перейдите в раздел `Теги`.
+3. Создайте необходимое колличество тегов. Тег должен содержать: название, произвольный цвет в hex формате вида #AAAFFF, уникальный слаг.
+`Теги могут быть разными. Например: Завтрак, Обед, Ужин, Перекус, Напитки, Сладости. Одному рецепту можно назначить несколько тегов, но как минимум один.`
+4. Для добавления списка, из более чем 2000 ингредиентов, выполните команду:
+   ```
+   sudo docker compose exec backend python manage.py load_ingredients
+   ```
 ## Описание переменных окружения
 
 **Для работы приложения необходимо установить следующие переменные окружения в файле `.env`:**
