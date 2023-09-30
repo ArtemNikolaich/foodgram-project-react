@@ -10,9 +10,19 @@ from recipes.models import (
 )
 
 
+class IngredientRecipeInLine(admin.TabularInline):
+    model = IngredientInRecipe
+    extra = 0
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'author', 'favorite_count')
+    inlines = (IngredientRecipeInLine,)
+    list_display = ('id',
+                    'name',
+                    'author',
+                    'favorite_count',
+                    'ingredients_list')
     list_filter = ('name', 'author', 'tags')
     search_fields = ('name',)
 
@@ -20,6 +30,14 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.favorites.count()
 
     favorite_count.short_description = 'Избрано'
+
+    def ingredients_list(self, obj):
+        return ", ".join(
+            [ingredient.name for ingredient
+             in obj.ingredients.all()]
+        )
+
+    ingredients_list.short_description = 'Ингредиенты'
 
 
 @admin.register(Ingredient)

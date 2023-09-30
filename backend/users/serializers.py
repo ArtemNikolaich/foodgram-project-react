@@ -4,7 +4,6 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SerializerMethodField
-from rest_framework.validators import UniqueValidator
 
 from users.models import Follow
 
@@ -18,12 +17,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     """
     username = serializers.CharField(
         required=True,
-        validators=[
-            UniqueValidator(
-                queryset=UserModel.objects.all(),
-                message='Пользователь с таким именем уже существует.'
-            )
-        ],
         error_messages={
             'required': 'Имя пользователя обязательно!'
         }
@@ -31,13 +24,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     email = serializers.EmailField(
         required=True,
-        validators=[
-            UniqueValidator(
-                queryset=UserModel.objects.all(),
-                message='Пользователь с таким адресом'
-                        ' электронной почты уже существует.'
-            )
-        ],
         error_messages={
             'required': 'Email обязателен!'
         }
@@ -52,11 +38,28 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     def validate_username(self, value):
         """
-        Проверка, что имя пользователя не является "me".
+        Проверка уникальности имени пользователя, независимо от регистра.
         """
-        if value.lower() == 'me':
+        username = value.lower()
+
+        if username == 'me':
             raise ValidationError("Имя пользователя 'me' недопустимо!")
-        return value
+
+        if UserModel.objects.filter(username__iexact=username).exists():
+            raise ValidationError('Пользователь с таким именем '
+                                  'уже существует.')
+        return username
+
+    def validate_email(self, value):
+        """
+        Проверка уникальности адреса электронной почты, независимо от регистра.
+        """
+        email = value.lower()
+
+        if UserModel.objects.filter(email__iexact=email).exists():
+            raise ValidationError('Пользователь с таким адресом '
+                                  'электронной почты уже существует.')
+        return email
 
 
 class CustomUserSerializer(UserSerializer):
