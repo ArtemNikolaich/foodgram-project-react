@@ -133,25 +133,28 @@ class RecipeWriteSerializer(ModelSerializer):
         Проверяет валидность списка ингредиентов.
         """
         ingredients = value
-
-        if not ingredients:
-            raise ValidationError(
-                'Совсем без ингредиента нельзя!'
-            )
-
         ingredients_list = []
+        errors = []
 
         for item in ingredients:
             ingredient = get_object_or_404(Ingredient, id=item['id'])
             if ingredient in ingredients_list:
-                raise ValidationError(
-                    'Ингредиенты не должны повторяться!'
-                )
+                errors.append({
+                    'ingredients': ['Ингредиенты не должны повторяться!']
+                })
+
             if int(item['amount']) < INGREDIENT_MIN_AMOUNT:
-                raise ValidationError(
-                    'Ингредиента должно быть хоть сколько-то!'
-                )
+                errors.append({
+                    'ingredients': [
+                        'Убедитесь, что это значение больше либо равно 1.'
+                    ]
+                })
+
             ingredients_list.append(ingredient)
+
+        if errors:
+            raise ValidationError(errors)
+
         return value
 
     def validate_tags(self, value):
@@ -161,15 +164,14 @@ class RecipeWriteSerializer(ModelSerializer):
         tags = value
 
         if not tags:
-            raise ValidationError(
-                'Совсем без тегов нельзя!'
-            )
+            raise ValidationError({
+                'tags': ['Совсем без тегов нельзя!']
+            })
 
         if len(tags) != len(set(tags)):
-            raise ValidationError(
-                'Теги должны быть уникальными!'
-            )
-
+            raise ValidationError({
+                'tags': ['Теги должны быть уникальными!']
+            })
         return value
 
     def validate_cooking_time(self, value):
@@ -179,9 +181,12 @@ class RecipeWriteSerializer(ModelSerializer):
         cooking_time = value
 
         if cooking_time < COOKING_TIME_MIN_VALUE:
-            raise ValidationError(
-                'Время готовки должно быть хотя бы минуту!'
-            )
+            raise ValidationError({
+                'cooking_time': [
+                    'Убедитесь, что это значение больше либо равно 1.'
+                ]
+            })
+
         return value
 
     def create_ingredients_amounts(self, ingredients, recipe):
